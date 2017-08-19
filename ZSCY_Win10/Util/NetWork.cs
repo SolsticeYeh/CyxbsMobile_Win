@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,6 +16,14 @@ namespace ZSCY_Win10.Util
 {
     class NetWork
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="api"></param>
+        /// <param name="paramList"></param>
+        /// <param name="PostORGet">默认为post请求</param>
+        /// <param name="fulluri"></param>
+        /// <returns></returns>
         public static async Task<string> getHttpWebRequest(string api, List<KeyValuePair<String, String>> paramList = null, int PostORGet = 0, bool fulluri = false)
         {
             string content = "";
@@ -154,6 +164,21 @@ namespace ZSCY_Win10.Util
                 }
             });
         }
+        public static async Task<string> RatioRequest(string key, string value)
+        {
+            HttpClient httpclient = new HttpClient();
+            string uri = "http://hongyan.cqupt.edu.cn/welcome/2017/api/apiRatio.php";
+            string json = "";
+            var content = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {key,value}
+            });
+            var response = await httpclient.PostAsync(uri,content);
+            json = await response.Content.ReadAsStringAsync();
+            return json;
+        }
+
+
 
     }
 }

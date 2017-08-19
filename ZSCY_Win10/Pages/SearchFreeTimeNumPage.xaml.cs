@@ -34,6 +34,7 @@ namespace ZSCY.Pages
     public sealed partial class SearchFreeTimeNumPage : Page
     {
         private ApplicationDataContainer appSetting;
+        private static string resourceName = "ZSCY";
         //private ObservableCollection<uIdList> muIdList = new ObservableCollection<uIdList>();
         public SearchFreeTimeNumPage()
         {
@@ -46,8 +47,18 @@ namespace ZSCY.Pages
                 //uIdListView.Height = e.NewSize.Height - 20 - 40;
             };
             //SystemNavigationManager.GetForCurrentView().BackRequested += App_BackRequested;
-            if (App.muIdList.Count == 0)
-                App.muIdList.Add(new uIdList { uId = appSetting.Values["stuNum"].ToString(), uName = appSetting.Values["name"].ToString() });
+            //TODO:未登陆时 不能自动添加自己的信息
+            try
+            {
+                var vault = new Windows.Security.Credentials.PasswordVault();
+                var credentialList = vault.FindAllByResource(resourceName);
+                credentialList[0].RetrievePassword();
+                //if (App.muIdList.Count == 0&&appSetting.Values.ContainsKey("idNum"))
+                if (App.muIdList.Count == 0 && credentialList.Count > 0)
+                    //App.muIdList.Add(new uIdList { uId = appSetting.Values["stuNum"].ToString(), uName = appSetting.Values["name"].ToString() });
+                    App.muIdList.Add(new uIdList { uId = credentialList[0].UserName, uName = appSetting.Values["name"].ToString() });
+            }
+            catch { }
         }
 
         private void App_BackRequested(object sender, BackRequestedEventArgs e)
@@ -151,7 +162,10 @@ namespace ZSCY.Pages
                             Utils.Message("学号或姓名不正确");
 
                     }
-                    catch (Exception) { }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine(ex.Message);
+                    }
 
                 }
                 AddTextBox.Text = "";

@@ -16,10 +16,14 @@ namespace ZSCY_Win10.Service
     public class CommunityFeedsService
     {
 
-        const string hotFeeds = @"cyxbsMobile/index.php/Home/Article/searchHotArticle";
-        const string bbddfeeds = @"cyxbsMobile/index.php/Home/Article/listArticle";
+        //const string hotFeeds = @"cyxbsMobile/index.php/Home/Article/searchHotArticle";
+        //const string bbddfeeds = @"cyxbsMobile/index.php/Home/Article/listArticle";
+        //TODO:新的api 可不传参数stuNum和idNum
+        const string hotFeeds = @"cyxbsMobile/index.php/Home/NewArticle/searchHotArticle";
+        const string bbddfeeds = @"cyxbsMobile/index.php/Home/NewArticle/listArticle";
         public static string[] feedsapi = { hotFeeds, bbddfeeds };
         public static ApplicationDataContainer appSetting = Windows.Storage.ApplicationData.Current.LocalSettings;
+        private static string resourceName = "ZSCY";
 
         /// <summary>
         /// 获取动态列表
@@ -28,11 +32,27 @@ namespace ZSCY_Win10.Service
         /// <returns>返回参数对应的列表数据</returns>
         public static async Task<List<BBDDFeed>> GetBBDD(int type = 1, int page = 0, int size = 15, int typeid = 5)
         {
+            //TODO:未登陆时 不添加参数stuNum和idNum
             return await Task.Run(async () =>
             {
                 List<KeyValuePair<String, String>> paramList = new List<KeyValuePair<String, String>>();
-                paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
-                paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+                try
+                {
+                    var vault = new Windows.Security.Credentials.PasswordVault();
+                    var credentialList = vault.FindAllByResource(resourceName);
+                    credentialList[0].RetrievePassword();
+                    if (credentialList.Count > 0)
+                    {
+                        //paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
+                        //paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+                        paramList.Add(new KeyValuePair<string, string>("stuNum", credentialList[0].UserName));
+                        paramList.Add(new KeyValuePair<string, string>("idNum", credentialList[0].Password));
+                    }
+                }
+                catch
+                {
+
+                }
                 paramList.Add(new KeyValuePair<string, string>("page", page.ToString()));
                 paramList.Add(new KeyValuePair<string, string>("size", size.ToString()));
                 if (typeid != 0)
@@ -108,11 +128,28 @@ namespace ZSCY_Win10.Service
 
         public static async Task<List<HotFeed>> GetHot(int type = 0, int page = 0, int size = 15, int typeid = 5)
         {
+            //TODO:未登陆时 不添加参数stuNum和idNum
             return await Task.Run(async () =>
            {
                List<KeyValuePair<String, String>> paramList = new List<KeyValuePair<String, String>>();
-               paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
-               paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+               try
+               {
+
+                   var vault = new Windows.Security.Credentials.PasswordVault();
+                   var credentialList = vault.FindAllByResource(resourceName);
+                   credentialList[0].RetrievePassword();
+                   if (credentialList.Count > 0)
+                   {
+                       //paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
+                       //paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+                       paramList.Add(new KeyValuePair<string, string>("stuNum", credentialList[0].UserName));
+                       paramList.Add(new KeyValuePair<string, string>("idNum", credentialList[0].Password));
+                   }
+               }
+               catch
+               {
+
+               }
                paramList.Add(new KeyValuePair<string, string>("page", page.ToString()));
                paramList.Add(new KeyValuePair<string, string>("size", size.ToString()));
                if (typeid != 0)
@@ -145,9 +182,14 @@ namespace ZSCY_Win10.Service
 
         public static async Task<string> setPraise(string type_id, string article_id, bool addORcancel)
         {
+            var vault = new Windows.Security.Credentials.PasswordVault();
+            var credentialList = vault.FindAllByResource(resourceName);
+            credentialList[0].RetrievePassword();
             List<KeyValuePair<String, String>> paramList = new List<KeyValuePair<String, String>>();
-            paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
-            paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+            //paramList.Add(new KeyValuePair<string, string>("stuNum", appSetting.Values["stuNum"].ToString()));
+            //paramList.Add(new KeyValuePair<string, string>("idNum", appSetting.Values["idNum"].ToString()));
+            paramList.Add(new KeyValuePair<string, string>("stuNum", credentialList[0].UserName));
+            paramList.Add(new KeyValuePair<string, string>("idNum", credentialList[0].Password));
             paramList.Add(new KeyValuePair<string, string>("type_id", type_id));
             paramList.Add(new KeyValuePair<string, string>("article_id", article_id));
             string praise = "";

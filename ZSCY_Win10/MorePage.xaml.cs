@@ -7,8 +7,10 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -20,6 +22,7 @@ using ZSCY.Data;
 using ZSCY.Pages;
 using ZSCY_Win10.Common;
 using ZSCY_Win10.Data;
+using ZSCY_Win10.Pages.ElectricChargeCheckPages;
 
 // “空白页”项模板在 http://go.microsoft.com/fwlink/?LinkId=234238 上提供
 
@@ -28,10 +31,13 @@ namespace ZSCY_Win10
     /// <summary>
     /// 可用于自身或导航至 Frame 内部的空白页。
     /// </summary>
+    /// 
     public sealed partial class MorePage : Page
     {
+        ApplicationDataContainer appSetting = Windows.Storage.ApplicationData.Current.LocalSettings;
         ObservableDictionary morepageclass = new ObservableDictionary();
         public static int isFreeRe = 0;
+        private static string resourceName = "ZSCY";
         public MorePage()
         {
             this.InitializeComponent();
@@ -173,50 +179,131 @@ namespace ZSCY_Win10
             }
             //MoreFrame.Visibility = Visibility.Visible;
             MoreContentTitleTextBlock.Text = item.Itemname;
+            //TODO:未登陆时 没有 补考/考试/分数信息 可查询空闲 无法自动添加自己的信息
             Debug.WriteLine(item.UniqueID);
             {
+                int count;
+                var vault = new Windows.Security.Credentials.PasswordVault();
+                try
+                {
+                    var credentialList = vault.FindAllByResource(resourceName);
+                    count = credentialList.Count;
+                }
+                catch
+                {
+                    count = 0;
+                }
                 switch (item.UniqueID)
                 {
                     case "ReExam":
-                        MoreFrame.Navigate(typeof(ExamPage), 3); ;
-                        MoreFrame.Visibility = Visibility.Visible;
-                        isFreeRe = 0;
-                        break;
+                        //if (appSetting.Values.ContainsKey("idNum"))
+                        if (count > 0)
+                        {
+                            MoreFrame.Navigate(typeof(ExamPage), 3); ;
+                            MoreFrame.Visibility = Visibility.Visible;
+                            isFreeRe = 0;
+                            break;
+                        }
+                        else
+                        {
+                            var msgPopup = new Data.loginControl("您还没有登录 无法查看补考信息~");
+                            msgPopup.LeftClick += (s, c) => { Frame rootFrame = Window.Current.Content as Frame; rootFrame.Navigate(typeof(LoginPage)); };
+                            msgPopup.RightClick += (s, c) => { new MessageDialog("您可以先去社区逛一逛~"); };
+                            msgPopup.ShowWIndow();
+                            break;
+                        }
                     case "Exam":
-                        MoreFrame.Navigate(typeof(ExamPage), 2);
-                        MoreFrame.Visibility = Visibility.Visible;
-                        isFreeRe = 0;
-                        break;
+                        //if (appSetting.Values.ContainsKey("idNum"))
+                        if (count > 0)
+                        {
+                            MoreFrame.Navigate(typeof(ExamPage), 2);
+                            MoreFrame.Visibility = Visibility.Visible;
+                            isFreeRe = 0;
+                            break;
+                        }
+                        else
+                        {
+                            var msgPopup = new Data.loginControl("您还没有登录 无法查看考试信息~");
+                            msgPopup.LeftClick += (s, c) => { Frame rootFrame = Window.Current.Content as Frame; rootFrame.Navigate(typeof(LoginPage)); };
+                            msgPopup.RightClick += (s, c) => { new MessageDialog("您可以先去社区逛一逛~"); };
+                            msgPopup.ShowWIndow();
+                            break;
+                        }
                     case "Socre":
-                        MoreFrame.Navigate(typeof(ScorePage));
-                        MoreFrame.Visibility = Visibility.Visible;
-                        isFreeRe = 0;
-                        break;
+                        //if (appSetting.Values.ContainsKey("idNum"))
+                        if (count > 0)
+                        {
+                            MoreFrame.Navigate(typeof(ScorePage));
+                            MoreFrame.Visibility = Visibility.Visible;
+                            isFreeRe = 0;
+                            break;
+                        }
+                        else
+                        {
+                            var msgPopup = new Data.loginControl("您还没有登录 无法查看成绩~");
+                            msgPopup.LeftClick += (s, c) => { Frame rootFrame = Window.Current.Content as Frame; rootFrame.Navigate(typeof(LoginPage)); };
+                            msgPopup.RightClick += (s, c) => { new MessageDialog("您可以先去社区逛一逛~"); };
+                            msgPopup.ShowWIndow();
+                            break;
+                        }
                     case "ClassRoom":
-                        MoreFrame.Navigate(typeof(EmptyRoomsPage));
-                        MoreFrame.Visibility = Visibility.Visible;
-                        isFreeRe = 0;
-                        break;
+                        //if (appSetting.Values.ContainsKey("idNum"))
+                        if (count > 0)
+                        {
+                            MoreFrame.Navigate(typeof(EmptyRoomsPage));
+                            MoreFrame.Visibility = Visibility.Visible;
+                            isFreeRe = 0;
+                            break;
+                        }
+                        else
+                        {
+                            var msgPopup = new Data.loginControl("您还没有登录 无法查询空教室~");
+                            msgPopup.LeftClick += (s, c) => { Frame rootFrame = Window.Current.Content as Frame; rootFrame.Navigate(typeof(LoginPage)); };
+                            msgPopup.RightClick += (s, c) => { new MessageDialog("您可以先去社区逛一逛~"); };
+                            msgPopup.ShowWIndow();
+                            break;
+                        }
                     case "Calendar":
                         MoreFrame.Navigate(typeof(CalendarPage));
                         MoreFrame.Visibility = Visibility.Visible;
                         isFreeRe = 0;
                         break;
                     case "FreeTime":
-                        MoreFrame.Navigate(typeof(SearchFreeTimeNumPage));
-                        MoreFrame.Visibility = Visibility.Visible;
-                        isFreeRe = 0;
-                        break;
+                        if (count > 0)
+                        {
+                            MoreFrame.Navigate(typeof(SearchFreeTimeNumPage));
+                            MoreFrame.Visibility = Visibility.Visible;
+                            isFreeRe = 0;
+                            break;
+                        }
+                        else
+                        {
+                            var msgPopup = new Data.loginControl("您还没有登录 无法查询空闲~");
+                            msgPopup.LeftClick += (s, c) => { Frame rootFrame = Window.Current.Content as Frame; rootFrame.Navigate(typeof(LoginPage)); };
+                            msgPopup.RightClick += (s, c) => { new MessageDialog("您可以先去社区逛一逛~"); };
+                            msgPopup.ShowWIndow();
+                            break;
+                        }
                     case "Card":
                         var a = await Launcher.LaunchUriAsync(new Uri("cquptcard:"));
                         MoreFrame.Visibility = Visibility.Collapsed;
+                        break;
+                    case "freshMan":
+                        Frame.Navigate(typeof(FirstPage));
+                        MoreFrame.Visibility = Visibility.Collapsed;
+                        isFreeRe = 0;
+                        break;
+                    case "Electricity":
+                        Frame.Navigate(typeof(ElectricityPage));
+                        MoreFrame.Visibility = Visibility.Collapsed;
+                        isFreeRe = 0;
                         break;
                     default:
                         break;
                 }
             }
         }
-
-
     }
+
+
 }
